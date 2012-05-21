@@ -6,7 +6,7 @@ Here's a good [guide](http://www.html5rocks.com/en/tutorials/appcache/beginner/)
 to understanding how the appcache works.
 
 An appcache manifest is a standard file that web browsers will use to let people
-continue using your application when offline. It's usefule for mobile
+continue using your application when offline. It's useful for mobile
 or if you're building an [open web app](https://developer.mozilla.org/en/Apps)
 that will be installed on a device from a website (like a
 [Boot To Gecko](https://developer.mozilla.org/en/Mozilla/Boot_to_Gecko/Writing_a_web_app)
@@ -18,7 +18,6 @@ Installation
 Install it like this in your settings.py file:
 
     INSTALLED_APPS = [
-        # ...
         'django_appcache',
     ]
 
@@ -37,7 +36,6 @@ cached files each time you deploy. To serve the manifest, add this to your
 urls.py or serve the generated file from a CDN or wherever.
 
     urlpatterns = patterns('',
-        # ...
         url('^appcache/', include('django_appcache.urls')),
     )
 
@@ -48,12 +46,13 @@ To tell the browser to use the appcache, link to it like this:
     <html {% appcache_manifest_link|safe %} >
 
 This will add an attribute to the html tag like this: ``manifest="<url>"``.
-If you have [jingo](https://github.com/jbalogh/jingo/)
-installed for use with Jinja2 then the function ``appcache_manifest_link()``
-will automatically be available in your templates.
+Alternatively, if you have [jingo](https://github.com/jbalogh/jingo/)
+installed for use with Jinja2 then you can call the function
+``appcache_manifest_link()`` in your templates.
 
-**IMPORTANT**: Every page you serve that links to the appcache will itself be
-cached. You probably don't want to do this on forms or any page that might
+**IMPORTANT**: Every page you serve that links to the appcache will
+be cached itself. You probably don't want to do this on forms or any page
+that might
 update dynamically. If the index page of your app cannot be cached like this
 then you probably don't want to use an appcache at all. If you still think you
 do then consider updating your index page using JavaScript.
@@ -115,10 +114,11 @@ in the cache section. The default looks like this:
 APPCACHE_FALLBACK_PATHS
 -----------------------
 
-This is a dict mapping keys (requested path) to fallback paths that will be
+This is a dict mapping requested paths to fallback paths that will be
 used when the app is offline. Example:
 
     APPCACHE_FALLBACK_PATHS = {
+        '/user-icons/': '/offline-icon.png',  # map a directory to a single URL.
         '/': '/offline.html',  # map all requests to a cached offline page.
     }
 
