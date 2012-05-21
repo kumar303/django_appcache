@@ -1,0 +1,11 @@
+CACHE MANIFEST
+# Last built: {{ build_version }}
+
+CACHE:
+{{ cache_paths }}
+
+NETWORK:
+{{ network_paths }}
+
+FALLBACK:
+{{ fallback_paths }}
