@@ -14,14 +14,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         cache_paths = []
+        media_url = settings.MEDIA_URL
+        if media_url.endswith('/'):
+            media_url = media_url[:-1]
         for part in settings.APPCACHE_MEDIA_TO_CACHE:
             pt = posixpath.join(settings.MEDIA_ROOT, part)
             for pt in glob(pt):
                 if not os.path.exists(pt):
                     raise CommandError('MEDIA_ROOT path %r does not exist at '
                                        '%r' % (part, pt))
-                pt = pt.replace(settings.MEDIA_ROOT, settings.MEDIA_URL)
-                pt = pt.replace('//', '/')
+                pt = pt.replace(settings.MEDIA_ROOT, media_url)
                 cache_paths.append(pt)
 
         cache_paths.extend(settings.APPCACHE_TO_CACHE)

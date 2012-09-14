@@ -12,7 +12,7 @@ from django_appcache.management.commands.build_appcache import Command
 from django_appcache import settings
 
 
-class Test(TestCase):
+class _Case(TestCase):
 
     def setUp(self):
         fp = tempfile.NamedTemporaryFile('w', delete=False)
@@ -22,6 +22,9 @@ class Test(TestCase):
 
     def tearDown(self):
         cache.clear()
+
+
+class Test(_Case):
 
     def test_build(self):
         with mock.patch.object(settings, 'APPCACHE_FILE_PATH', self.tmp):
@@ -37,21 +40,35 @@ class Test(TestCase):
             res = self.client.get(reverse('django_appcache.manifest'))
             self.assertContains(res, 'CACHE MANIFEST')
 
-    @mock.patch.object(settings, 'APPCACHE_MEDIA_TO_CACHE',
-                       ['somefile.css'])
-    def test_media(self):
-        media_tmp = tempfile.mkdtemp()
-        self.addCleanup(lambda: shutil.rmtree(media_tmp))
-        with open(os.path.join(media_tmp, 'somefile.css'), 'w') as fp:
-            fp.write('<css>')
-        with mock.patch.object(settings, 'APPCACHE_FILE_PATH', self.tmp):
-            with mock.patch.object(settings, 'MEDIA_ROOT', media_tmp):
-                Command().handle()
-            res = self.client.get(reverse('django_appcache.manifest'))
-            self.assertContains(res, 'somefile.css')
-
     def test_missing_manifest(self):
         with mock.patch.object(settings, 'APPCACHE_FILE_PATH',
                                '__bogus__/manifest.appcache'):
             res = self.client.get(reverse('django_appcache.manifest'))
             self.assertEquals(res.status_code, 404)
+
+
+@mock.patch.object(settings, 'APPCACHE_MEDIA_TO_CACHE',
+                   ['somefile.css'])
+class TestMedia(_Case):
+
+    def setUp(self):
+        super(TestMedia, self).setUp()
+        self.media_tmp = tempfile.mkdtemp()
+        self.addCleanup(lambda: shutil.rmtree(self.media_tmp))
+        with open(os.path.join(self.media_tmp, 'somefile.css'), 'w') as fp:
+            fp.write('<css>')
+
+    def test_media(self):
+        with mock.patch.object(settings, 'APPCACHE_FILE_PATH', self.tmp):
+            with mock.patch.object(settings, 'MEDIA_ROOT', self.media_tmp):
+                Command().handle()
+            res = self.client.get(reverse('django_appcache.manifest'))
+            self.assertContains(res, 'somefile.css')
+
+    def test_media_url(self):
+        with mock.patch.object(settings, 'APPCACHE_FILE_PATH', self.tmp):
+            with mock.patch.object(settings, 'MEDIA_ROOT', self.media_tmp):
+                with mock.patch.object(settings, 'MEDIA_URL', 'https://cdn/'):
+                    Command().handle()
+            res = self.client.get(reverse('django_appcache.manifest'))
+            self.assertContains(res, 'https://cdn/somefile.css')
