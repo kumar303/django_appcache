@@ -74,7 +74,7 @@ expanded using ``glob.glob()``. Example:
 
     APPCACHE_MEDIA_TO_CACHE = [
         'css/all-compressed.css',
-        'js/all-compressed.js',
+        'js/all-compressed.js?cache_id=123',
         'js/lib/jquery-1.*.js'
     ]
 
@@ -83,12 +83,15 @@ this:
 
     CACHE:
     http://media-url/media/css/all-compressed.css
-    http://media-url/media/js/all-compressed.js
+    http://media-url/media/js/all-compressed.js?cache_id=123
     http://media-url/media/js/lib/jquery-1.6.4.js
     http://media-url/media/js/lib/jquery-1.7.1.js
 
 Notice how the wildcard ``jquery-*.js`` was expanded to actual paths. This
 follows Python glob syntax.
+
+This setting can also be a callable object that yields paths when
+iterated over.
 
 APPCACHE_TO_CACHE
 -----------------
@@ -102,6 +105,9 @@ Example:
         'https://some-server.net/include.js'
     ]
 
+This setting can also be a callable object that yields paths when
+iterated over.
+
 APPCACHE_NET_PATHS
 ------------------
 
@@ -110,6 +116,9 @@ By default, all paths (*) will hit the network unless they were listed
 in the cache section. The default looks like this:
 
     APPCACHE_NET_PATHS = ['*']
+
+This setting can also be a callable object that yields paths when
+iterated over.
 
 APPCACHE_FALLBACK_PATHS
 -----------------------
