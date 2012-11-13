@@ -91,7 +91,16 @@ Notice how the wildcard ``jquery-*.js`` was expanded to actual paths. This
 follows Python glob syntax.
 
 This setting can also be a callable object that yields paths when
-iterated over.
+iterated over. For example:
+
+    def make_images():
+        return ['file1.css', 'file2.css']
+
+    APPCACHE_MEDIA_TO_CACHE = make_images
+
+If you list a file ending in the ``.css`` suffix, the build command will also
+scan that file for any ``url()`` declarations in the CSS rules and automatically
+add each of those URLs to the cache. This feature was added in 1.4.
 
 APPCACHE_TO_CACHE
 -----------------
