@@ -2,6 +2,7 @@ from datetime import datetime
 from glob import glob
 import os
 import posixpath
+import re
 from urlparse import urlparse
 
 from django.core.management.base import BaseCommand, CommandError
@@ -36,6 +37,7 @@ class Command(BaseCommand):
                 cache_paths.append(pt)
 
         cache_paths.extend(_iter_setting(settings.APPCACHE_TO_CACHE))
+        cache_paths.extend(extract_images(cache_paths))
         cache_paths = "\n".join(cache_paths)
         network_paths = "\n".join(_iter_setting(settings.APPCACHE_NET_PATHS))
         fallback_paths = "\n".join(['%s %s' % (op, fp) for op, fp in
@@ -51,6 +53,35 @@ class Command(BaseCommand):
         with open(settings.APPCACHE_FILE_PATH, 'w') as fp:
             fp.write(tpl.render(ctx))
         print 'Wrote appcache to %s' % fp.name
+
+
+def extract_images(files):
+    images = []
+    css_files = [f for f in files if f.split('?')[0].endswith('.css')]
+
+    for css_path in css_files:
+        css_path = css_path.split('?')[0]
+        if css_path.startswith('/'):
+            css_path = css_path[1:]
+        css_content = ''
+        with open(css_path, 'r') as css_in:
+            css_content = css_in.read()
+        imgs = re.findall('url\(([^)]*?)\)', css_content)
+        if imgs:
+            for img in imgs:
+                url = os.path.normpath(os.path.join('/',
+                    os.path.dirname(css_path),
+                    img))
+                images.append(url)
+
+    return unique(images)
+
+
+# Thanks peterbe!
+def unique(seq):
+   set = {}
+   map(set.__setitem__, seq, [])
+   return set.keys()
 
 
 def _iter_setting(setting):
